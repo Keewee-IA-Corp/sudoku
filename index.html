@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sudoku</title>
+  <meta name="description" content="Un jeu de Sudoku à jouer directement dans le navigateur.">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="entete">
+    <h1 class="entete__titre">Sudoku</h1>
+    <p class="entete__intro">Remplissez la grille pour que chaque ligne, chaque colonne et chaque bloc de 3×3 contienne une seule fois les chiffres de 1 à 9.</p>
+  </header>
+
+  <main class="jeu">
+    <!-- Disposition : grille à gauche, panneau (saisie puis commandes) à droite sur ordinateur ; empilés sur mobile. -->
+    <div class="jeu__disposition">
+    <section class="jeu__plateau" aria-labelledby="titre-grille">
+      <h2 id="titre-grille" class="visuellement-cache">Grille de jeu</h2>
+      <!-- Au-dessus de la grille : niveau de la partie et chronomètre (mis à jour par assets/js/main.js). -->
+      <div class="infos-partie">
+        <p class="infos-partie__element">Niveau : <span id="info-niveau" class="infos-partie__valeur">Facile</span></p>
+        <p class="infos-partie__element">Temps : <span id="chrono" class="infos-partie__valeur infos-partie__chrono" role="timer">00:00</span></p>
+      </div>
+      <!-- La grille est générée par assets/js/generateur.js et affichée par assets/js/main.js -->
+      <div class="plateau">
+        <div id="grille" class="grille" role="grid" aria-label="Grille de Sudoku, 9 lignes et 9 colonnes" aria-describedby="aide-saisie"></div>
+        <!-- Message de victoire : superposé à la grille (qui reste visible derrière), affiché après le tremblement des cases. -->
+        <div id="victoire" class="victoire" role="dialog" aria-modal="false" aria-labelledby="victoire-titre" aria-describedby="victoire-texte" hidden>
+          <div class="victoire__carte">
+            <p id="victoire-titre" class="victoire__titre">Félicitations !</p>
+            <p id="victoire-texte" class="victoire__texte">Vous avez réussi la grille.</p>
+            <div class="victoire__boutons">
+              <button type="button" id="victoire-fermer" class="bouton bouton--secondaire">Fermer</button>
+              <button type="button" id="victoire-nouvelle-partie" class="bouton">Nouvelle partie</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <noscript>
+        <p class="message-noscript">Le jeu a besoin de JavaScript pour afficher la grille. Activez-le dans votre navigateur.</p>
+      </noscript>
+      <p id="aide-saisie" class="jeu__aide">Touchez une case vide, puis un chiffre. Au clavier : flèches pour se déplacer, 1 à 9 pour saisir, Suppr ou Retour arrière pour effacer. La grille est vérifiée quand la dernière case est remplie, ou à tout moment avec « Vérifier la grille ».</p>
+    </section>
+
+    <div class="jeu__panneau">
+    <section class="saisie" aria-labelledby="titre-saisie">
+      <h2 id="titre-saisie" class="visuellement-cache">Saisie des chiffres</h2>
+      <div id="pave-saisie" class="pave" role="group" aria-label="Saisie d’un chiffre">
+        <button type="button" class="pave__bouton" data-chiffre="1">1</button>
+        <button type="button" class="pave__bouton" data-chiffre="2">2</button>
+        <button type="button" class="pave__bouton" data-chiffre="3">3</button>
+        <button type="button" class="pave__bouton" data-chiffre="4">4</button>
+        <button type="button" class="pave__bouton" data-chiffre="5">5</button>
+        <button type="button" class="pave__bouton" data-chiffre="6">6</button>
+        <button type="button" class="pave__bouton" data-chiffre="7">7</button>
+        <button type="button" class="pave__bouton" data-chiffre="8">8</button>
+        <button type="button" class="pave__bouton" data-chiffre="9">9</button>
+        <button type="button" class="pave__bouton pave__bouton--effacer" data-effacer aria-label="Effacer la case sélectionnée">Effacer</button>
+      </div>
+      <button type="button" id="bouton-verifier" class="bouton jeu__verifier">Vérifier la grille</button>
+      <p id="message-jeu" class="jeu__message" aria-live="polite"></p>
+    </section>
+
+    <section class="commandes" aria-labelledby="titre-commandes">
+      <h2 id="titre-commandes" class="visuellement-cache">Commandes de la partie</h2>
+      <form id="form-nouvelle-partie" class="commandes__formulaire">
+        <fieldset class="niveaux">
+          <legend class="niveaux__legende">Niveau de difficulté</legend>
+          <div class="niveaux__choix">
+            <label class="niveau">
+              <input class="niveau__radio" type="radio" name="niveau" value="facile" checked>
+              <span class="niveau__libelle">Facile</span>
+            </label>
+            <label class="niveau">
+              <input class="niveau__radio" type="radio" name="niveau" value="moyen">
+              <span class="niveau__libelle">Moyen</span>
+            </label>
+            <label class="niveau">
+              <input class="niveau__radio" type="radio" name="niveau" value="difficile">
+              <span class="niveau__libelle">Difficile</span>
+            </label>
+          </div>
+        </fieldset>
+        <div class="commandes__boutons">
+          <button type="submit" id="bouton-nouvelle-partie" class="bouton">Nouvelle partie</button>
+          <button type="button" id="bouton-recommencer" class="bouton bouton--secondaire">Recommencer</button>
+        </div>
+      </form>
+      <p id="etat-partie" class="commandes__etat" aria-live="polite">Partie en cours : niveau Facile.</p>
+      <p id="aide-niveau" class="commandes__aide" hidden>Le niveau choisi s’appliquera quand vous cliquerez sur « Nouvelle partie ».</p>
+    </section>
+    </div><!-- /.jeu__panneau -->
+    </div><!-- /.jeu__disposition -->
+
+    <section class="legende" aria-labelledby="titre-legende">
+      <h2 id="titre-legende" class="legende__titre">Légende</h2>
+      <ul class="legende__liste">
+        <li class="legende__element">
+          <span class="legende__exemple legende__exemple--depart" aria-hidden="true">5</span>
+          Chiffre de départ : il est fixé et ne peut pas être modifié.
+        </li>
+        <li class="legende__element">
+          <span class="legende__exemple" aria-hidden="true"></span>
+          Case vide : c’est à vous de la remplir.
+        </li>
+        <li class="legende__element">
+          <span class="legende__exemple legende__exemple--saisie" aria-hidden="true">7</span>
+          Votre saisie : vous pouvez la changer ou l’effacer.
+        </li>
+        <li class="legende__element">
+          <span class="legende__exemple legende__exemple--conflit" aria-hidden="true">3</span>
+          Chiffre en conflit : il est déjà présent dans la même ligne, colonne ou bloc.
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="pied">
+    <p>Sudoku — un petit jeu qui fonctionne entièrement dans votre navigateur.</p>
+  </footer>
+
+  <script src="assets/js/grilles.js"></script>
+  <script src="assets/js/generateur.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

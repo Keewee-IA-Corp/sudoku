@@ -1,0 +1,638 @@
+/* ===== Variables ===== */
+:root {
+  --couleur-fond: #f5f7fb;
+  --couleur-surface: #ffffff;
+  --couleur-texte: #1d2433;
+  --couleur-texte-doux: #4a5468;
+  --couleur-primaire: #1f4e8c;
+  --couleur-bordure-fine: #b8c2d3;
+  --couleur-bordure-bloc: #1d2433;
+  --couleur-case-depart: #e3e9f3;
+  --couleur-chiffre-depart: #1d2433;
+  --couleur-chiffre-saisie: #1f4e8c;
+  --couleur-case-selection: #fff1b8;
+  --couleur-contour-selection: #b25e00;
+  --couleur-chiffre-conflit: #b3261e;
+  --couleur-case-conflit: #fde4e2;
+  --couleur-succes: #1b6b34;
+  --couleur-fond-succes: #e3f4e8;
+
+  --police: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --espace-xs: 0.25rem;
+  --espace-s: 0.5rem;
+  --espace-m: 1rem;
+  --espace-l: 1.5rem;
+
+  --rayon: 0.5rem;
+  --epaisseur-fine: 1px;
+  --epaisseur-bloc: 3px;
+
+  --largeur-grille-max: 32rem;
+  --largeur-panneau: 20rem;
+  --largeur-disposition: calc(var(--largeur-grille-max) + var(--largeur-panneau) + var(--espace-l));
+  --taille-chiffre: clamp(1.1rem, 5.5vw, 1.9rem);
+
+  /* Victoire : durée totale du tremblement (garder la même valeur que DUREE_TREMBLEMENT_MS dans main.js). */
+  --duree-tremblement: 1s;
+  --amplitude-tremblement: 3px;
+  --couleur-voile: rgba(245, 247, 251, 0.55);
+  --ombre-carte: 0 0.5rem 1.5rem rgba(29, 36, 51, 0.25);
+}
+
+/* ===== Base ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--police);
+  color: var(--couleur-texte);
+  background: var(--couleur-fond);
+  line-height: 1.5;
+}
+
+.visuellement-cache {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===== En-tête ===== */
+.entete {
+  padding: var(--espace-l) var(--espace-m) var(--espace-m);
+  text-align: center;
+}
+
+.entete__titre {
+  margin: 0 0 var(--espace-s);
+  font-size: 2rem;
+  color: var(--couleur-primaire);
+}
+
+.entete__intro {
+  max-width: var(--largeur-grille-max);
+  margin: 0 auto;
+  color: var(--couleur-texte-doux);
+}
+
+/* ===== Zone de jeu ===== */
+.jeu {
+  padding: 0 var(--espace-s) var(--espace-l);
+}
+
+/* Mobile : grille, saisie puis commandes empilées et centrées. */
+.jeu__disposition {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espace-m);
+}
+
+.jeu__plateau {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: var(--largeur-grille-max);
+  min-width: 0;
+}
+
+.jeu__panneau {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-m);
+  width: 100%;
+  max-width: var(--largeur-grille-max);
+  min-width: 0;
+}
+
+.saisie {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Ordinateur : grille sous le titre, décalée à gauche ; panneau de saisie à droite, aligné sur le haut de la grille. */
+@media (min-width: 48rem) {
+  .jeu__disposition {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--espace-l);
+    max-width: var(--largeur-disposition);
+    margin: 0 auto;
+  }
+
+  .jeu__plateau {
+    flex: 1 1 var(--largeur-grille-max);
+  }
+
+  .jeu__panneau {
+    flex: 0 0 var(--largeur-panneau);
+    max-width: var(--largeur-panneau);
+  }
+
+  .saisie .pave {
+    margin-top: 0;
+  }
+}
+
+.jeu__aide,
+.jeu__message {
+  width: 100%;
+  max-width: var(--largeur-grille-max);
+  margin: var(--espace-s) 0 0;
+  font-size: 0.9rem;
+  color: var(--couleur-texte-doux);
+  text-align: center;
+}
+
+.jeu__message {
+  min-height: 1.5em;
+  color: var(--couleur-texte);
+  font-weight: 700;
+}
+
+.jeu__message--succes {
+  padding: var(--espace-s);
+  border-radius: var(--rayon);
+  background: var(--couleur-fond-succes);
+  color: var(--couleur-succes);
+  font-size: 1rem;
+}
+
+.jeu__message--erreur {
+  color: var(--couleur-chiffre-conflit);
+}
+
+.jeu__verifier {
+  margin-top: var(--espace-s);
+}
+
+.bouton:disabled,
+.pave__bouton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bouton:disabled:hover {
+  background: var(--couleur-primaire);
+}
+
+.pave__bouton:disabled:hover {
+  background: var(--couleur-surface);
+}
+
+/* ===== Pavé de saisie ===== */
+.pave {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--espace-xs);
+  width: 100%;
+  max-width: var(--largeur-grille-max);
+  margin-top: var(--espace-s);
+}
+
+.pave__bouton {
+  min-height: 2.75rem;
+  min-width: 0;
+  padding: var(--espace-xs);
+  border: var(--epaisseur-fine) solid var(--couleur-bordure-fine);
+  border-radius: var(--rayon);
+  background: var(--couleur-surface);
+  color: var(--couleur-chiffre-saisie);
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pave__bouton:hover {
+  background: var(--couleur-case-depart);
+}
+
+.pave__bouton:focus-visible {
+  outline: var(--epaisseur-bloc) solid var(--couleur-texte);
+  outline-offset: 2px;
+}
+
+.pave__bouton--effacer {
+  font-size: 0.95rem;
+  color: var(--couleur-texte);
+}
+
+/* ===== Commandes ===== */
+.commandes {
+  max-width: var(--largeur-grille-max);
+  margin: 0 auto var(--espace-m);
+  padding: var(--espace-m);
+  background: var(--couleur-surface);
+  border-radius: var(--rayon);
+}
+
+/* Dans le panneau, l'espacement est géré par .jeu__panneau. */
+.jeu__panneau .commandes {
+  width: 100%;
+  margin: 0;
+}
+
+.commandes__formulaire {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espace-m);
+}
+
+.niveaux {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.niveaux__legende {
+  padding: 0;
+  margin-bottom: var(--espace-xs);
+  font-weight: 700;
+}
+
+.niveaux__choix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espace-xs);
+}
+
+.niveau {
+  position: relative;
+  cursor: pointer;
+}
+
+/* Le bouton radio reste accessible au clavier, mais visuellement remplacé par une pastille. */
+.niveau__radio {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.niveau__libelle {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: var(--espace-s) var(--espace-m);
+  border: var(--epaisseur-fine) solid var(--couleur-bordure-fine);
+  border-radius: var(--rayon);
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  line-height: 1.6;
+}
+
+.niveau__radio:checked + .niveau__libelle {
+  background: var(--couleur-primaire);
+  border-color: var(--couleur-primaire);
+  color: var(--couleur-surface);
+  font-weight: 700;
+}
+
+.niveau__radio:focus-visible + .niveau__libelle,
+.bouton:focus-visible {
+  outline: var(--epaisseur-bloc) solid var(--couleur-texte);
+  outline-offset: 2px;
+}
+
+.bouton {
+  min-height: 2.75rem;
+  padding: var(--espace-s) var(--espace-m);
+  border: 0;
+  border-radius: var(--rayon);
+  background: var(--couleur-primaire);
+  color: var(--couleur-surface);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bouton:hover {
+  background: var(--couleur-texte);
+}
+
+.commandes__boutons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espace-s);
+}
+
+/* Bouton secondaire (Recommencer) : contour plutôt que fond plein. */
+.bouton--secondaire {
+  border: var(--epaisseur-fine) solid var(--couleur-primaire);
+  background: var(--couleur-surface);
+  color: var(--couleur-primaire);
+}
+
+.bouton--secondaire:hover {
+  background: var(--couleur-case-depart);
+  color: var(--couleur-texte);
+}
+
+.commandes__etat {
+  margin: var(--espace-s) 0 0;
+  color: var(--couleur-texte-doux);
+}
+
+.commandes__aide {
+  margin: var(--espace-xs) 0 0;
+  font-size: 0.9rem;
+  color: var(--couleur-texte-doux);
+}
+
+.commandes__aide[hidden] {
+  display: none;
+}
+
+/* ===== Grille ===== */
+.grille {
+  display: grid;
+  grid-template-rows: repeat(9, 1fr);
+  width: 100%;
+  max-width: var(--largeur-grille-max);
+  aspect-ratio: 1 / 1;
+  border: var(--epaisseur-bloc) solid var(--couleur-bordure-bloc);
+  background: var(--couleur-surface);
+  user-select: none;
+}
+
+.grille__ligne {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  min-height: 0;
+}
+
+.case {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  font-size: var(--taille-chiffre);
+  border-right: var(--epaisseur-fine) solid var(--couleur-bordure-fine);
+  border-bottom: var(--epaisseur-fine) solid var(--couleur-bordure-fine);
+}
+
+.grille__ligne:last-child .case {
+  border-bottom: 0;
+}
+
+.case:last-child {
+  border-right: 0;
+}
+
+.case--fin-bloc-colonne {
+  border-right: var(--epaisseur-bloc) solid var(--couleur-bordure-bloc);
+}
+
+.case--fin-bloc-ligne {
+  border-bottom: var(--epaisseur-bloc) solid var(--couleur-bordure-bloc);
+}
+
+.case--depart {
+  background: var(--couleur-case-depart);
+  color: var(--couleur-chiffre-depart);
+  font-weight: 700;
+  cursor: default;
+}
+
+.case--vide,
+.case--saisie {
+  background: var(--couleur-surface);
+  cursor: pointer;
+}
+
+.case--saisie {
+  color: var(--couleur-chiffre-saisie);
+}
+
+/* Chiffre saisi en conflit : rouge, souligné en vagues (repère qui ne dépend pas que de la couleur). */
+.case.case--conflit {
+  background: var(--couleur-case-conflit);
+  color: var(--couleur-chiffre-conflit);
+  font-weight: 700;
+  text-decoration: underline wavy var(--couleur-chiffre-conflit);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.15em;
+}
+
+/* Grille réussie : contour vert, cases non modifiables. */
+.grille.grille--terminee {
+  border-color: var(--couleur-succes);
+}
+
+.grille--terminee .case {
+  cursor: default;
+}
+
+.case:focus {
+  outline: none;
+}
+
+/* ===== Infos de la partie (niveau et chronomètre, au-dessus de la grille) ===== */
+.infos-partie {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--espace-xs) var(--espace-m);
+  width: 100%;
+  max-width: var(--largeur-grille-max);
+  margin-bottom: var(--espace-s);
+}
+
+.infos-partie__element {
+  margin: 0;
+  color: var(--couleur-texte-doux);
+}
+
+.infos-partie__valeur {
+  font-weight: 700;
+  color: var(--couleur-texte);
+}
+
+/* Chiffres à chasse fixe : le chrono ne « saute » pas quand les secondes défilent. */
+.infos-partie__chrono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== Victoire : tremblement des cases puis message superposé ===== */
+.plateau {
+  position: relative;
+  width: 100%;
+  max-width: var(--largeur-grille-max);
+}
+
+/* Les cases qui tremblent ne débordent pas de la grille (pas de défilement horizontal). */
+.grille {
+  overflow: hidden;
+}
+
+@keyframes tremblement {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(calc(-1 * var(--amplitude-tremblement)));
+  }
+  75% {
+    transform: translateX(var(--amplitude-tremblement));
+  }
+}
+
+/* Léger mouvement horizontal répété 4 fois, soit --duree-tremblement au total. */
+.grille--tremble .case {
+  animation: tremblement calc(var(--duree-tremblement) / 4) ease-in-out 4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grille--tremble .case {
+    animation: none;
+  }
+}
+
+/* Voile semi-transparent : la grille reste visible sous le message. */
+.victoire {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espace-m);
+  background: var(--couleur-voile);
+}
+
+.victoire[hidden] {
+  display: none;
+}
+
+.victoire__carte {
+  width: 100%;
+  max-width: 20rem;
+  padding: var(--espace-m);
+  border: var(--epaisseur-bloc) solid var(--couleur-succes);
+  border-radius: var(--rayon);
+  background: var(--couleur-surface);
+  box-shadow: var(--ombre-carte);
+  text-align: center;
+}
+
+.victoire__titre {
+  margin: 0 0 var(--espace-xs);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--couleur-succes);
+}
+
+.victoire__texte {
+  margin: 0 0 var(--espace-m);
+  color: var(--couleur-texte);
+}
+
+.victoire__boutons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--espace-s);
+}
+
+/* Case sélectionnée : fond jaune et contour visible (au clic comme au clavier). */
+.case.case--selectionnee {
+  background: var(--couleur-case-selection);
+  box-shadow: inset 0 0 0 var(--epaisseur-bloc) var(--couleur-contour-selection);
+}
+
+.message-noscript {
+  text-align: center;
+  color: var(--couleur-texte);
+}
+
+/* ===== Légende ===== */
+.legende {
+  max-width: var(--largeur-grille-max);
+  margin: var(--espace-l) auto 0;
+  padding: var(--espace-m);
+  background: var(--couleur-surface);
+  border-radius: var(--rayon);
+}
+
+.legende__titre {
+  margin: 0 0 var(--espace-s);
+  font-size: 1.1rem;
+}
+
+.legende__liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legende__element {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-s);
+  margin-bottom: var(--espace-xs);
+}
+
+.legende__exemple {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border: var(--epaisseur-fine) solid var(--couleur-bordure-fine);
+  background: var(--couleur-surface);
+  font-size: 1.1rem;
+}
+
+.legende__exemple--depart {
+  background: var(--couleur-case-depart);
+  font-weight: 700;
+}
+
+.legende__exemple--saisie {
+  color: var(--couleur-chiffre-saisie);
+}
+
+.legende__exemple--conflit {
+  background: var(--couleur-case-conflit);
+  color: var(--couleur-chiffre-conflit);
+  font-weight: 700;
+  text-decoration: underline wavy var(--couleur-chiffre-conflit);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.15em;
+}
+
+/* Ordinateur : la légende s'étend sur la largeur de la disposition grille + panneau. */
+@media (min-width: 48rem) {
+  .legende {
+    max-width: var(--largeur-disposition);
+  }
+}
+
+/* ===== Pied de page ===== */
+.pied {
+  padding: var(--espace-m);
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--couleur-texte-doux);
+}
+
+.pied p {
+  margin: 0;
+}
